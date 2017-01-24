@@ -7,6 +7,7 @@ from . import base
 from .. import network
 
 from . import resultscript
+from . import serializedgraph
 
 
 class MatchTreeWidgetItem(QtWidgets.QTreeWidgetItem):
@@ -90,6 +91,7 @@ class MatchResultDialog(base.BaseDialog):
     self.script_code = None
     self.script_compile = None
     self.script_dialog = None
+    self.graph_dialog = serializedgraph.SerializedGraphDialog()
 
     # buttons
     self.btn_set = QtWidgets.QPushButton('&Select best')
@@ -163,15 +165,13 @@ class MatchResultDialog(base.BaseDialog):
     if parent is None:
       return
 
-    id1 = item.parent().api_id
-    id2 = item.api_id
-
-    network.delayed_query("GET", "display/compare/", json=False,
-                          params={"id1": id1, "id2": id2},
+    network.delayed_query("GET", "/collab/annotation/",
+                          params={"type": "assembly",
+                                  "instance": item.api_id},
                           callback=self.handle_display_change)
 
   def handle_display_change(self, response):
-    # TODO: handle display change
+    self.graph_dialog.show(response['data'])
 
   def item_double_clicked(self, item, column):
     del column
